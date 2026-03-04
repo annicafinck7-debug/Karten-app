@@ -1,0 +1,30 @@
+[
+  {
+    "id": "verkaufskarte",
+    "name": "Verkaufs-Karte – Kunden & Firmen",
+    "desc": "Deine Verkaufs-Karte (Kunden, Firmen, Aufträge, Preis/Notiz, Routing).",
+    "url": "https://annicafinck7-debug.github.io/test-karte/",
+    "tags": ["Verkauf", "Kunden", "Firmen"]
+  },
+  {
+    "id": "europa-preiskarte-streusalz",
+    "name": "Europa Preiskarte – Pellets / Streusalz",
+    "desc": "Preis-Karte Europa (Pellets/Streusalz) – schnelle Angebote & Vergleich.",
+    "url": "https://beautypellets07.github.io/-beautypellets/",
+    "tags": ["Europa", "Preise", "Pellets", "Streusalz"]
+  },
+  {
+    "id": "europa-preiskarte-saegerestholz",
+    "name": "Europa Preiskarte – Pellets / Sägerestholz",
+    "desc": "Preis-Karte Europa (Pellets/Sägerestholz) – Markt & Vergleich.",
+    "url": "https://angiepellets-dev.github.io/Holz-Markt-/",
+    "tags": ["Europa", "Preise", "Pellets", "Sägerestholz"]
+  },
+  {
+    "id": "pelletwerke-europa",
+    "name": "Pelletwerke – Europa Grundkarte / Preiskarte",
+    "desc": "Pelletwerke-Übersicht Europa (Grundkarte/Preise).",
+    "url": "https://angiepellets-dev.github.io/Europa-Grund-Karte/",
+    "tags": ["Pelletwerke", "Europa", "Übersicht"]
+  }
+]
