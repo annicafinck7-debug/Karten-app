@@ -1,1 +1,439 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Meine Karten</title>
 
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f172a;
+      --card2:rgba(255,255,255,.06);
+      --text:#e5e7eb;
+      --muted:#a3adc2;
+      --border:rgba(148,163,184,.18);
+      --shadow:0 16px 50px rgba(0,0,0,.35);
+      --btn:#22c55e;
+      --btnText:#052e16;
+      --accent:#8b5cf6;
+      --danger:#ef4444;
+    }
+    html,body{height:100%; margin:0; background:var(--bg); color:var(--text);
+      font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial; overscroll-behavior:none;}
+    *{box-sizing:border-box}
+    a{color:inherit}
+
+    .app{height:100%; display:flex; flex-direction:column;}
+
+    /* Topbar */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      display:flex; align-items:center; gap:10px;
+      padding:12px 14px;
+      background:rgba(11,18,32,.92);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    .logo{
+      width:34px; height:34px; border-radius:12px;
+      background:linear-gradient(135deg, var(--accent), rgba(255,255,255,.1));
+      box-shadow:var(--shadow);
+      flex:0 0 auto;
+    }
+    .title{display:flex; flex-direction:column; min-width:0;}
+    .title b{font-size:14px}
+    .title span{color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .spacer{flex:1}
+
+    .btn{
+      height:36px;
+      padding:0 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--card2);
+      color:var(--text);
+      cursor:pointer;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+    }
+    .btn.primary{ background:var(--btn); border-color:transparent; color:var(--btnText); }
+    .btn.danger{
+      background:rgba(239,68,68,.16);
+      border-color:rgba(239,68,68,.35);
+      color:#fecaca;
+    }
+    .btn:active{transform:translateY(1px)}
+
+    /* Home */
+    .home{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      max-width:1100px;
+      width:100%;
+      margin:0 auto;
+    }
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .search{
+      flex:1;
+      min-width:220px;
+      height:40px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:var(--card);
+      color:var(--text);
+      padding:0 12px;
+      outline:none;
+    }
+    .search::placeholder{color:rgba(163,173,194,.7)}
+    .hint{color:var(--muted); font-size:12px}
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:12px;
+    }
+    @media (max-width: 900px){ .grid{grid-template-columns: repeat(2, minmax(0, 1fr));} }
+    @media (max-width: 580px){ .grid{grid-template-columns: 1fr;} }
+
+    .card{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius:18px;
+      padding:14px;
+      box-shadow:var(--shadow);
+      cursor:pointer;
+      transition:transform .08s ease;
+      user-select:none;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-height:128px;
+    }
+    .card:active{transform:translateY(1px)}
+    .card .name{font-weight:1000; font-size:15px}
+    .card .desc{color:var(--muted); font-size:12px; min-height:32px}
+    .card .tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:2px;}
+    .tag{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    /* Viewer */
+    .viewer{
+      flex:1;
+      display:none;
+      position:relative;
+      width:100%;
+      height:calc(100vh - 61px);
+      background:#000;
+    }
+    .viewer.active{display:block;}
+
+    iframe{
+      border:0;
+      width:100%;
+      height:100%;
+      background:#111;
+    }
+
+    .viewerBar{
+      position:absolute; left:12px; right:12px; top:12px;
+      z-index:30;
+      display:flex; align-items:center; gap:10px;
+      background:rgba(11,18,32,.72);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:10px 10px;
+      backdrop-filter: blur(10px);
+    }
+    .viewerTitle{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      flex:1;
+    }
+    .viewerTitle b{font-size:13px}
+    .viewerTitle span{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      padding:6px 10px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:12px;
+      user-select:none;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:16px;
+      transform:translateX(-50%);
+      background:rgba(15,23,42,.92);
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      box-shadow:var(--shadow);
+      display:none;
+      z-index:9999;
+      max-width:min(520px, 92vw);
+      font-size:13px;
+    }
+
+    /* Install hint button only shows when install is possible */
+    #btnInstall{display:none;}
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="logo" aria-hidden="true"></div>
+      <div class="title">
+        <b>Meine Karten</b>
+        <span id="subTitle">Auswahl</span>
+      </div>
+      <div class="spacer"></div>
+
+      <button class="btn" id="btnInstall" title="App installieren">⬇️ Installieren</button>
+      <button class="btn" id="btnReload" title="Aktualisieren">↻</button>
+    </div>
+
+    <!-- HOME -->
+    <main class="home" id="home">
+      <div class="row">
+        <input class="search" id="search" placeholder="Karte suchen (Name / Tags) …" />
+        <button class="btn primary" id="btnOpenLast" title="Letzte Karte öffnen">▶ Letzte</button>
+      </div>
+      <div class="hint">
+        Tipp: Auf dem Handy kannst du die App installieren:
+        <b>Teilen → „Zum Startbildschirm“</b> (iPhone) oder <b>Installieren</b> (Android/Chrome).
+      </div>
+
+      <section class="grid" id="grid"></section>
+    </main>
+
+    <!-- VIEWER -->
+    <section class="viewer" id="viewer" aria-hidden="true">
+      <div class="viewerBar">
+        <button class="btn" id="btnBack" title="Zurück">←</button>
+        <div class="viewerTitle">
+          <b id="viewerName">—</b>
+          <span id="viewerUrl">—</span>
+        </div>
+        <span class="pill" id="pillHint">Tippen: Zurück</span>
+        <button class="btn" id="btnOpenNew" title="In neuem Tab öffnen">↗</button>
+      </div>
+
+      <iframe id="frame" title="Karten-Viewer" referrerpolicy="no-referrer"></iframe>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+<script>
+  const LS_LAST = "mapsHub_last";
+  const LS_ORDER = "mapsHub_order_v1";
+
+  const els = {
+    subTitle: document.getElementById("subTitle"),
+    home: document.getElementById("home"),
+    viewer: document.getElementById("viewer"),
+    grid: document.getElementById("grid"),
+    search: document.getElementById("search"),
+    btnBack: document.getElementById("btnBack"),
+    btnOpenNew: document.getElementById("btnOpenNew"),
+    btnReload: document.getElementById("btnReload"),
+    btnOpenLast: document.getElementById("btnOpenLast"),
+    frame: document.getElementById("frame"),
+    viewerName: document.getElementById("viewerName"),
+    viewerUrl: document.getElementById("viewerUrl"),
+    toast: document.getElementById("toast"),
+    btnInstall: document.getElementById("btnInstall"),
+  };
+
+  let maps = [];
+  let current = null;
+
+  function toast(msg){
+    els.toast.textContent = msg;
+    els.toast.style.display = "block";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>els.toast.style.display="none", 2600);
+  }
+
+  function saveLS(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function loadLS(k,fb){ try{ const s = localStorage.getItem(k); return s ? JSON.parse(s) : fb; }catch(e){ return fb; } }
+
+  function esc(s){
+    return String(s??"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+  }
+
+  function normalize(str){
+    return String(str||"").toLowerCase()
+      .replace(/\s+/g," ")
+      .replace(/[.,;:_/\\|()\-–—]/g,"")
+      .trim();
+  }
+
+  function applyOrder(list){
+    const order = loadLS(LS_ORDER, null);
+    if(!order || !Array.isArray(order) || !order.length) return list;
+
+    const idx = new Map(order.map((id,i)=>[id,i]));
+    return [...list].sort((a,b)=>{
+      const ai = idx.has(a.id) ? idx.get(a.id) : 9999;
+      const bi = idx.has(b.id) ? idx.get(b.id) : 9999;
+      if(ai !== bi) return ai-bi;
+      return (a.name||"").localeCompare(b.name||"");
+    });
+  }
+
+  function render(){
+    const q = normalize(els.search.value);
+    const list = applyOrder(maps).filter(m=>{
+      if(!q) return true;
+      const hay = normalize([m.name, m.desc, (m.tags||[]).join(" ")].join(" "));
+      return hay.includes(q);
+    });
+
+    els.grid.innerHTML = list.map(m=>`
+      <article class="card" data-id="${esc(m.id)}" tabindex="0" role="button" aria-label="${esc(m.name)} öffnen">
+        <div class="name">${esc(m.name)}</div>
+        <div class="desc">${esc(m.desc || "")}</div>
+        <div class="tags">
+          ${(m.tags||[]).slice(0,6).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}
+        </div>
+      </article>
+    `).join("");
+
+    els.grid.querySelectorAll(".card").forEach(card=>{
+      const open = ()=>openMap(card.dataset.id);
+      card.addEventListener("click", open);
+      card.addEventListener("keydown", (e)=>{
+        if(e.key==="Enter" || e.key===" "){
+          e.preventDefault();
+          open();
+        }
+      });
+    });
+  }
+
+  function setMode(mode){
+    const viewing = mode === "viewer";
+    els.home.style.display = viewing ? "none" : "flex";
+    els.viewer.classList.toggle("active", viewing);
+    els.viewer.setAttribute("aria-hidden", viewing ? "false" : "true");
+    els.subTitle.textContent = viewing ? "Karte geöffnet" : "Auswahl";
+  }
+
+  function openMap(id){
+    const m = maps.find(x=>x.id===id);
+    if(!m){ toast("Karte nicht gefunden"); return; }
+
+    current = m;
+    saveLS(LS_LAST, {id:m.id, ts: Date.now()});
+
+    els.viewerName.textContent = m.name;
+    els.viewerUrl.textContent = m.url;
+    els.frame.src = m.url;
+
+    setMode("viewer");
+    history.pushState({view:"viewer", id:m.id}, "", "#"+encodeURIComponent(m.id));
+  }
+
+  function closeViewer(){
+    current = null;
+    els.frame.src = "about:blank";
+    setMode("home");
+    history.pushState({view:"home"}, "", "#");
+  }
+
+  async function loadMaps(){
+    const res = await fetch("maps.json", {cache:"no-store"});
+    maps = await res.json();
+    render();
+  }
+
+  // PWA install button
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e)=>{
+    e.preventDefault();
+    deferredPrompt = e;
+    els.btnInstall.style.display = "inline-flex";
+  });
+  els.btnInstall.addEventListener("click", async ()=>{
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice.catch(()=>null);
+    deferredPrompt = null;
+    els.btnInstall.style.display = "none";
+    if(choice?.outcome === "accepted") toast("App wird installiert ✅");
+  });
+
+  // Buttons
+  els.btnBack.addEventListener("click", closeViewer);
+  els.btnReload.addEventListener("click", ()=>location.reload());
+  els.btnOpenNew.addEventListener("click", ()=>{
+    if(current?.url) window.open(current.url, "_blank", "noopener,noreferrer");
+  });
+
+  els.btnOpenLast.addEventListener("click", ()=>{
+    const last = loadLS(LS_LAST, null);
+    if(last?.id){ openMap(last.id); }
+    else toast("Noch keine Karte geöffnet.");
+  });
+
+  els.search.addEventListener("input", render);
+
+  // Handle back button
+  window.addEventListener("popstate", ()=>{
+    if(location.hash && location.hash.length > 1){
+      const id = decodeURIComponent(location.hash.slice(1));
+      openMap(id);
+    }else{
+      setMode("home");
+    }
+  });
+
+  // Init
+  (async ()=>{
+    await loadMaps();
+
+    // Auto-open if hash
+    if(location.hash && location.hash.length > 1){
+      const id = decodeURIComponent(location.hash.slice(1));
+      openMap(id);
+    } else {
+      setMode("home");
+    }
+
+    // Register SW
+    if("serviceWorker" in navigator){
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    }
+  })();
+</script>
+</body>
+</html>
