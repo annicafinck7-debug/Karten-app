@@ -1,4 +1,4 @@
-const CACHE = "maps-hub-v1";
+const CACHE = "maps-hub-v3"; // <-- JEDES MAL HOCHZÄHLEN, wenn du was änderst
 
 const ASSETS = [
   "./",
@@ -21,20 +21,31 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Nur App-Dateien cachen (deine Karten-URLs sind extern)
+// ✅ Network-first für index.html + maps.json (damit Änderungen sofort ankommen)
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   const sameOrigin = url.origin === self.location.origin;
-
   if(!sameOrigin) return;
 
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request).then(res => {
+  const isCore =
+    url.pathname.endsWith("/index.html") ||
+    url.pathname.endsWith("/maps.json") ||
+    url.pathname.endsWith("/manifest.json") ||
+    url.pathname.endsWith("/");
+
+  if(isCore){
+    event.respondWith(
+      fetch(event.request).then(res=>{
         const copy = res.clone();
-        caches.open(CACHE).then(cache => cache.put(event.request, copy)).catch(()=>{});
+        caches.open(CACHE).then(c=>c.put(event.request, copy)).catch(()=>{});
         return res;
-      }).catch(()=>cached);
-    })
+      }).catch(()=>caches.match(event.request))
+    );
+    return;
+  }
+
+  // sonst cache-first
+  event.respondWith(
+    caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });
