@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>Meine Karten</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b1220">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,7 +22,6 @@
       --btn:#22c55e;
       --btnText:#052e16;
       --accent:#8b5cf6;
-      --danger:#ef4444;
     }
     html,body{height:100%; margin:0; background:var(--bg); color:var(--text);
       font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial; overscroll-behavior:none;}
@@ -32,7 +30,7 @@
 
     .app{height:100%; display:flex; flex-direction:column;}
 
-    /* Topbar */
+    /* Topbar (Home) */
     .topbar{
       position:sticky; top:0; z-index:50;
       display:flex; align-items:center; gap:10px;
@@ -67,12 +65,8 @@
       user-select:none;
     }
     .btn.primary{ background:var(--btn); border-color:transparent; color:var(--btnText); }
-    .btn.danger{
-      background:rgba(239,68,68,.16);
-      border-color:rgba(239,68,68,.35);
-      color:#fecaca;
-    }
     .btn:active{transform:translateY(1px)}
+    #btnInstall{display:none;}
 
     /* Home */
     .home{
@@ -154,6 +148,7 @@
       background:#111;
     }
 
+    /* ✅ Overlay Bar – Auto Hide */
     .viewerBar{
       position:absolute; left:12px; right:12px; top:12px;
       z-index:30;
@@ -163,7 +158,14 @@
       border-radius:16px;
       padding:10px 10px;
       backdrop-filter: blur(10px);
+      transition:opacity .25s ease, transform .25s ease;
     }
+    .viewerBar.hidden{
+      opacity:0;
+      transform:translateY(-10px);
+      pointer-events:none;
+    }
+
     .viewerTitle{
       min-width:0;
       display:flex;
@@ -173,15 +175,36 @@
     }
     .viewerTitle b{font-size:13px}
     .viewerTitle span{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
+
+    /* ✅ Small floating Back button (always visible, minimal) */
+    .fabBack{
+      position:absolute;
+      left:12px;
+      top:12px;
+      z-index:35;
+      width:44px;
+      height:44px;
+      border-radius:16px;
       border:1px solid var(--border);
-      background:rgba(255,255,255,.04);
-      padding:6px 10px;
-      border-radius:999px;
-      font-weight:900;
-      font-size:12px;
+      background:rgba(11,18,32,.72);
+      backdrop-filter: blur(10px);
+      box-shadow:var(--shadow);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+      cursor:pointer;
       user-select:none;
+    }
+    .fabBack.show{display:flex;}
+
+    /* Tap-zone at very top to show bar */
+    .topTapZone{
+      position:absolute;
+      left:0; right:0; top:0;
+      height:56px;
+      z-index:25;
+      background:transparent;
     }
 
     .toast{
@@ -200,9 +223,6 @@
       max-width:min(520px, 92vw);
       font-size:13px;
     }
-
-    /* Install hint button only shows when install is possible */
-    #btnInstall{display:none;}
   </style>
 </head>
 
@@ -215,7 +235,6 @@
         <span id="subTitle">Auswahl</span>
       </div>
       <div class="spacer"></div>
-
       <button class="btn" id="btnInstall" title="App installieren">⬇️ Installieren</button>
       <button class="btn" id="btnReload" title="Aktualisieren">↻</button>
     </div>
@@ -230,19 +249,21 @@
         Tipp: Auf dem Handy kannst du die App installieren:
         <b>Teilen → „Zum Startbildschirm“</b> (iPhone) oder <b>Installieren</b> (Android/Chrome).
       </div>
-
       <section class="grid" id="grid"></section>
     </main>
 
     <!-- VIEWER -->
     <section class="viewer" id="viewer" aria-hidden="true">
-      <div class="viewerBar">
+      <div class="topTapZone" id="topTapZone" title="Tippen: Leiste anzeigen"></div>
+
+      <div class="fabBack" id="fabBack" title="Zurück">←</div>
+
+      <div class="viewerBar" id="viewerBar">
         <button class="btn" id="btnBack" title="Zurück">←</button>
         <div class="viewerTitle">
           <b id="viewerName">—</b>
           <span id="viewerUrl">—</span>
         </div>
-        <span class="pill" id="pillHint">Tippen: Zurück</span>
         <button class="btn" id="btnOpenNew" title="In neuem Tab öffnen">↗</button>
       </div>
 
@@ -254,7 +275,6 @@
 
 <script>
   const LS_LAST = "mapsHub_last";
-  const LS_ORDER = "mapsHub_order_v1";
 
   const els = {
     subTitle: document.getElementById("subTitle"),
@@ -271,6 +291,9 @@
     viewerUrl: document.getElementById("viewerUrl"),
     toast: document.getElementById("toast"),
     btnInstall: document.getElementById("btnInstall"),
+    viewerBar: document.getElementById("viewerBar"),
+    fabBack: document.getElementById("fabBack"),
+    topTapZone: document.getElementById("topTapZone"),
   };
 
   let maps = [];
@@ -297,22 +320,9 @@
       .trim();
   }
 
-  function applyOrder(list){
-    const order = loadLS(LS_ORDER, null);
-    if(!order || !Array.isArray(order) || !order.length) return list;
-
-    const idx = new Map(order.map((id,i)=>[id,i]));
-    return [...list].sort((a,b)=>{
-      const ai = idx.has(a.id) ? idx.get(a.id) : 9999;
-      const bi = idx.has(b.id) ? idx.get(b.id) : 9999;
-      if(ai !== bi) return ai-bi;
-      return (a.name||"").localeCompare(b.name||"");
-    });
-  }
-
   function render(){
     const q = normalize(els.search.value);
-    const list = applyOrder(maps).filter(m=>{
+    const list = maps.filter(m=>{
       if(!q) return true;
       const hay = normalize([m.name, m.desc, (m.tags||[]).join(" ")].join(" "));
       return hay.includes(q);
@@ -348,6 +358,22 @@
     els.subTitle.textContent = viewing ? "Karte geöffnet" : "Auswahl";
   }
 
+  // ✅ Auto-hide controls
+  let hideTimer = null;
+
+  function showControls(){
+    els.viewerBar.classList.remove("hidden");
+    els.fabBack.classList.remove("show");
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hideControls, 2000);
+  }
+
+  function hideControls(){
+    // bar weg, nur mini-back bleibt
+    els.viewerBar.classList.add("hidden");
+    els.fabBack.classList.add("show");
+  }
+
   function openMap(id){
     const m = maps.find(x=>x.id===id);
     if(!m){ toast("Karte nicht gefunden"); return; }
@@ -361,6 +387,9 @@
 
     setMode("viewer");
     history.pushState({view:"viewer", id:m.id}, "", "#"+encodeURIComponent(m.id));
+
+    // nach Öffnen: kurz anzeigen, dann weg
+    showControls();
   }
 
   function closeViewer(){
@@ -394,9 +423,20 @@
 
   // Buttons
   els.btnBack.addEventListener("click", closeViewer);
+  els.fabBack.addEventListener("click", closeViewer);
   els.btnReload.addEventListener("click", ()=>location.reload());
   els.btnOpenNew.addEventListener("click", ()=>{
     if(current?.url) window.open(current.url, "_blank", "noopener,noreferrer");
+  });
+
+  // Tap top zone to show bar again
+  els.topTapZone.addEventListener("click", showControls);
+
+  // Also show controls if user taps anywhere on viewer (nice on mobile)
+  els.viewer.addEventListener("pointerdown", (e)=>{
+    // wenn user gerade am oberen Rand tippt -> show
+    const y = e.clientY || 0;
+    if(y < 80) showControls();
   });
 
   els.btnOpenLast.addEventListener("click", ()=>{
@@ -407,7 +447,6 @@
 
   els.search.addEventListener("input", render);
 
-  // Handle back button
   window.addEventListener("popstate", ()=>{
     if(location.hash && location.hash.length > 1){
       const id = decodeURIComponent(location.hash.slice(1));
@@ -417,11 +456,9 @@
     }
   });
 
-  // Init
   (async ()=>{
     await loadMaps();
 
-    // Auto-open if hash
     if(location.hash && location.hash.length > 1){
       const id = decodeURIComponent(location.hash.slice(1));
       openMap(id);
@@ -429,7 +466,6 @@
       setMode("home");
     }
 
-    // Register SW
     if("serviceWorker" in navigator){
       navigator.serviceWorker.register("./sw.js").catch(()=>{});
     }
