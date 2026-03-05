@@ -2,14 +2,37 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <!-- ✅ viewport-fit=cover = iPhone Safe-Area richtig nutzen -->
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
   <title>Meine Karten</title>
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b1220">
+
+  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- ✅ ICONS (empfohlen: echte PNG-Dateien) -->
+  <!-- Favicon -->
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <link rel="icon" href="icons/icon-512.png" sizes="512x512">
+
+  <!-- iPhone/iPad Home Screen Icon -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <!-- Optional: Windows Tile -->
+  <meta name="msapplication-TileColor" content="#0b1220">
+  <meta name="msapplication-TileImage" content="icons/icon-144.png">
+
+  <!-- ✅ iOS SPLASH (Launch Screen) – braucht echte Dateien -->
+  <!-- Du kannst später mehr Größen ergänzen – ich hab dir die wichtigsten Vorlagen rein -->
+  <link rel="apple-touch-startup-image" href="splash/iphone-1170x2532.png"
+        media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="splash/iphone-1290x2796.png"
+        media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="splash/iphone-1125x2436.png"
+        media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
 
   <style>
     :root{
@@ -34,36 +57,18 @@
       background:var(--bg);
       color:var(--text);
       font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      overscroll-behavior: none; /* ✅ verhindert Pull-to-refresh (Chrome/Android) */
+      overscroll-behavior: none;
       -webkit-tap-highlight-color: transparent;
     }
     *{box-sizing:border-box}
-    a{color:inherit}
     button,input{font:inherit}
 
-    /* ✅ iOS: Scroll “appiger” + weniger Safari-Overlay-Gefühl */
-    body{
-      -webkit-overflow-scrolling: touch;
-      touch-action: manipulation;
-    }
+    .app{height:100%;display:flex;flex-direction:column;overflow:hidden;}
 
-    /* App Shell */
-    .app{
-      height:100%;
-      display:flex;
-      flex-direction:column;
-      overflow:hidden; /* ✅ verhindert, dass iOS oben “zieht” */
-    }
-
-    /* Topbar */
     .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding: calc(10px + var(--safeTop)) 14px 10px 14px; /* ✅ Safe-Area top */
+      position:sticky; top:0; z-index:50;
+      display:flex; align-items:center; gap:10px;
+      padding: calc(10px + var(--safeTop)) 14px 10px 14px;
       background: rgba(11,18,32,.92);
       backdrop-filter: blur(10px);
       border-bottom:1px solid var(--border);
@@ -76,13 +81,11 @@
     }
     .title{display:flex;flex-direction:column;min-width:0}
     .title b{font-size:14px}
-    .title span{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .title span{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .spacer{flex:1}
 
     .btn{
-      height:36px;
-      padding:0 12px;
-      border-radius:12px;
+      height:36px; padding:0 12px; border-radius:12px;
       border:1px solid var(--border);
       background:var(--card2);
       color:var(--text);
@@ -96,66 +99,41 @@
     .btn.primary{ background:var(--btn); border-color:transparent; color:var(--btnText); }
     .btn:active{transform:translateY(1px)}
 
-    /* Screens container (Home + Viewer) */
-    .screens{
-      position:relative;
-      flex:1;
-      overflow:hidden;
-    }
+    .screens{position:relative;flex:1;overflow:hidden;}
 
-    /* HOME */
     .home{
-      position:absolute;
-      inset:0;
+      position:absolute; inset:0;
       overflow:auto;
-      padding: 14px 14px calc(14px + var(--safeBottom)) 14px; /* ✅ Safe bottom */
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      max-width:1100px;
-      width:100%;
-      margin:0 auto;
+      padding: 14px 14px calc(14px + var(--safeBottom)) 14px;
+      display:flex; flex-direction:column; gap:12px;
+      max-width:1100px; width:100%; margin:0 auto;
       transform: translateX(0);
       transition: transform .25s ease, opacity .25s ease;
     }
-    .home.hidden{
-      transform: translateX(-8%);
-      opacity:0;
-      pointer-events:none;
-    }
+    .home.hidden{transform: translateX(-8%); opacity:0; pointer-events:none;}
 
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
     .search{
-      flex:1;
-      min-width:220px;
-      height:42px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:var(--card);
-      color:var(--text);
-      padding:0 12px;
-      outline:none;
+      flex:1; min-width:220px; height:42px;
+      border-radius:14px; border:1px solid var(--border);
+      background:var(--card); color:var(--text);
+      padding:0 12px; outline:none;
     }
     .search::placeholder{color:rgba(163,173,194,.7)}
-
     .hint{color:var(--muted); font-size:12px}
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap:12px;
-    }
-    @media (max-width: 900px){ .grid{grid-template-columns: repeat(2, minmax(0, 1fr));} }
-    @media (max-width: 580px){ .grid{grid-template-columns: 1fr;} }
+    .grid{display:grid;grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width:900px){.grid{grid-template-columns: repeat(2, minmax(0,1fr));}}
+    @media (max-width:580px){.grid{grid-template-columns: 1fr;}}
 
     .card{
       border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       border-radius:18px;
       padding:14px;
       box-shadow:var(--shadow);
       cursor:pointer;
-      transition: transform .10s ease;
+      transition:transform .10s ease;
       user-select:none;
       display:flex;
       flex-direction:column;
@@ -177,30 +155,18 @@
       white-space:nowrap;
     }
 
-    /* VIEWER */
     .viewer{
-      position:absolute;
-      inset:0;
+      position:absolute; inset:0;
       background:#000;
       transform: translateX(105%);
       transition: transform .25s ease;
       will-change: transform;
     }
-    .viewer.active{
-      transform: translateX(0);
-    }
+    .viewer.active{transform: translateX(0);}
+    iframe{border:0;width:100%;height:100%;background:#111;}
 
-    iframe{
-      border:0;
-      width:100%;
-      height:100%;
-      background:#111;
-    }
-
-    /* Top overlay bar */
     .viewerBar{
-      position:absolute;
-      left:12px; right:12px;
+      position:absolute; left:12px; right:12px;
       top: calc(12px + var(--safeTop));
       z-index:30;
       display:flex; align-items:center; gap:10px;
@@ -211,29 +177,17 @@
       backdrop-filter: blur(10px);
       transition:opacity .25s ease, transform .25s ease;
     }
-    .viewerBar.hidden{
-      opacity:0;
-      transform:translateY(-10px);
-      pointer-events:none;
-    }
-    .viewerTitle{
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      flex:1;
-    }
+    .viewerBar.hidden{opacity:0;transform:translateY(-10px);pointer-events:none;}
+    .viewerTitle{min-width:0;display:flex;flex-direction:column;gap:2px;flex:1;}
     .viewerTitle b{font-size:13px}
     .viewerTitle span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-    /* Mini back (always) */
     .fabBack{
       position:absolute;
       left:12px;
       top: calc(12px + var(--safeTop));
       z-index:35;
-      width:44px;
-      height:44px;
+      width:44px;height:44px;
       border-radius:16px;
       border:1px solid var(--border);
       background:rgba(11,18,32,.72);
@@ -248,24 +202,13 @@
     }
     .fabBack.show{display:flex;}
 
-    /* Tap-zone to show bar */
-    .topTapZone{
-      position:absolute;
-      left:0; right:0;
-      top:0;
-      height: 78px;
-      z-index:25;
-      background:transparent;
-    }
+    .topTapZone{position:absolute;left:0;right:0;top:0;height:78px;z-index:25;background:transparent;}
 
-    /* ✅ Loader (wie App) */
     .loader{
-      position:absolute;
-      left:12px; right:12px;
+      position:absolute;left:12px;right:12px;
       top: calc(64px + var(--safeTop));
-      height:3px;
-      border-radius:999px;
-      background: rgba(255,255,255,.10);
+      height:3px;border-radius:999px;
+      background:rgba(255,255,255,.10);
       overflow:hidden;
       z-index:40;
       opacity:0;
@@ -273,22 +216,14 @@
       transition: opacity .2s ease, transform .2s ease;
       pointer-events:none;
     }
-    .loader.show{
-      opacity:1;
-      transform: translateY(0);
-    }
+    .loader.show{opacity:1;transform: translateY(0);}
     .loader > i{
-      display:block;
-      height:100%;
-      width:40%;
+      display:block;height:100%;width:40%;
       background: linear-gradient(90deg, rgba(139,92,246,.2), rgba(34,197,94,.9), rgba(139,92,246,.2));
       animation: loadMove .9s infinite ease-in-out;
       border-radius:999px;
     }
-    @keyframes loadMove{
-      0%{ transform: translateX(-120%); }
-      100%{ transform: translateX(320%); }
-    }
+    @keyframes loadMove{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
 
     .toast{
       position:fixed;
@@ -322,19 +257,15 @@
     </div>
 
     <div class="screens">
-      <!-- HOME -->
       <main class="home" id="home">
         <div class="row">
           <input class="search" id="search" placeholder="Karte suchen (Name / Tags) …" />
           <button class="btn primary" id="btnOpenLast" title="Letzte Karte öffnen">▶ Letzte</button>
         </div>
-        <div class="hint">
-          Tipp: Wenn du’s schon installiert hast, ignorier Browser-Buttons – die App läuft standalone sauber.
-        </div>
+        <div class="hint">Favorit: Öffne eine Karte → zurück → „Letzte“ funktioniert immer.</div>
         <section class="grid" id="grid"></section>
       </main>
 
-      <!-- VIEWER -->
       <section class="viewer" id="viewer" aria-hidden="true">
         <div class="topTapZone" id="topTapZone" title="Tippen: Leiste anzeigen"></div>
 
@@ -443,16 +374,13 @@
     els.subTitle.textContent = viewing ? "Karte geöffnet" : "Auswahl";
   }
 
-  // ✅ Auto-hide controls
   let hideTimer = null;
-
   function showControls(){
     els.viewerBar.classList.remove("hidden");
     els.fabBack.classList.remove("show");
     clearTimeout(hideTimer);
     hideTimer = setTimeout(hideControls, 1800);
   }
-
   function hideControls(){
     els.viewerBar.classList.add("hidden");
     els.fabBack.classList.add("show");
@@ -472,13 +400,11 @@
     els.viewerName.textContent = m.name;
     els.viewerUrl.textContent = m.url;
 
-    // Loader an, src setzen
     showLoader(true);
     els.frame.src = m.url;
 
     setMode("viewer");
     history.pushState({view:"viewer", id:m.id}, "", "#"+encodeURIComponent(m.id));
-
     showControls();
   }
 
@@ -496,7 +422,6 @@
     render();
   }
 
-  // Buttons
   els.btnBack.addEventListener("click", closeViewer);
   els.fabBack.addEventListener("click", closeViewer);
   els.btnReload.addEventListener("click", ()=>location.reload());
@@ -504,17 +429,13 @@
     if(current?.url) window.open(current.url, "_blank", "noopener,noreferrer");
   });
 
-  // Show bar on tap
   els.topTapZone.addEventListener("click", showControls);
   els.viewer.addEventListener("pointerdown", (e)=>{
     const y = e.clientY || 0;
     if(y < 110) showControls();
   });
 
-  // iframe load -> loader aus
-  els.frame.addEventListener("load", ()=>{
-    showLoader(false);
-  });
+  els.frame.addEventListener("load", ()=>showLoader(false));
 
   els.btnOpenLast.addEventListener("click", ()=>{
     const last = loadLS(LS_LAST, null);
@@ -532,32 +453,6 @@
       setMode("home");
     }
   });
-
-  // ✅ Edge-swipe zurück (links wischen wie iPhone)
-  let swipe = {active:false, x0:0, y0:0};
-  els.viewer.addEventListener("touchstart", (e)=>{
-    if(!els.viewer.classList.contains("active")) return;
-    const t = e.touches?.[0];
-    if(!t) return;
-    // nur wenn am linken Rand gestartet (Edge gesture)
-    if(t.clientX > 24) return;
-    swipe = {active:true, x0:t.clientX, y0:t.clientY};
-  }, {passive:true});
-
-  els.viewer.addEventListener("touchmove", (e)=>{
-    if(!swipe.active) return;
-    const t = e.touches?.[0];
-    if(!t) return;
-    const dx = t.clientX - swipe.x0;
-    const dy = Math.abs(t.clientY - swipe.y0);
-    // horizontal deutlich stärker als vertikal
-    if(dx > 70 && dy < 50){
-      swipe.active = false;
-      closeViewer();
-    }
-  }, {passive:true});
-
-  els.viewer.addEventListener("touchend", ()=>{ swipe.active=false; }, {passive:true});
 
   (async ()=>{
     await loadMaps();
