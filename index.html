@@ -2,14 +2,10 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>Meine Karten</title>
 
 <link rel="manifest" href="manifest.json">
-
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-
 <meta name="theme-color" content="#0b1220">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,34 +16,55 @@ html,body{
 height:100%;
 margin:0;
 background:#0b1220;
-color:#fff;
-font-family:system-ui;
-overflow-x:hidden;
-overscroll-behavior-x:none;
-touch-action:pan-y;
--webkit-overflow-scrolling:touch;
+color:#e5e7eb;
+font:14px system-ui;
+overscroll-behavior:none;
+touch-action:manipulation;
+}
+
+/* verhindert graue Safari Pull-Leiste */
+body{
+position:fixed;
+width:100%;
+overflow:hidden;
 }
 
 .app{
 height:100%;
 display:flex;
 flex-direction:column;
-overflow:hidden;
+overflow:auto;
 }
+
+/* Topbar */
 
 .topbar{
 position:sticky;
 top:0;
 display:flex;
 align-items:center;
-padding:12px;
+gap:10px;
+padding:12px 14px;
 background:#0b1220;
-border-bottom:1px solid rgba(255,255,255,0.1);
-z-index:10;
+border-bottom:1px solid rgba(148,163,184,.18);
+z-index:50;
+}
+
+.logo{
+width:34px;
+height:34px;
+border-radius:12px;
+background:linear-gradient(135deg,#8b5cf6,rgba(255,255,255,.1));
 }
 
 .title{
-font-weight:700;
+display:flex;
+flex-direction:column;
+}
+
+.title span{
+font-size:12px;
+color:#a3adc2;
 }
 
 .spacer{
@@ -55,53 +72,100 @@ flex:1;
 }
 
 .btn{
-background:#1e293b;
-border:none;
-padding:8px 12px;
-border-radius:10px;
-color:white;
+height:36px;
+padding:0 12px;
+border-radius:12px;
+border:1px solid rgba(148,163,184,.18);
+background:rgba(255,255,255,.06);
+color:#fff;
 cursor:pointer;
+font-weight:900;
+display:flex;
+align-items:center;
+}
+
+.btn.primary{
+background:#22c55e;
+color:#052e16;
+border:none;
 }
 
 .home{
-flex:1;
-overflow:auto;
-padding:16px;
+padding:14px;
+display:flex;
+flex-direction:column;
+gap:12px;
+max-width:1100px;
+margin:auto;
+width:100%;
 }
 
 .row{
 display:flex;
 gap:10px;
+flex-wrap:wrap;
 }
 
 .search{
 flex:1;
-padding:10px;
-border-radius:10px;
-border:1px solid rgba(255,255,255,0.2);
+min-width:220px;
+height:40px;
+border-radius:14px;
+border:1px solid rgba(148,163,184,.18);
 background:#0f172a;
 color:white;
+padding:0 12px;
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(2,1fr);
+grid-template-columns:repeat(3,1fr);
 gap:12px;
-margin-top:16px;
+}
+
+@media (max-width:900px){
+.grid{grid-template-columns:repeat(2,1fr);}
+}
+
+@media (max-width:580px){
+.grid{grid-template-columns:1fr;}
 }
 
 .card{
-background:#0f172a;
-border-radius:16px;
-padding:16px;
+border:1px solid rgba(148,163,184,.18);
+background:rgba(255,255,255,.05);
+border-radius:18px;
+padding:14px;
 cursor:pointer;
+display:flex;
+flex-direction:column;
+gap:6px;
 }
 
+.card .name{
+font-weight:900;
+}
+
+.card .desc{
+font-size:12px;
+color:#a3adc2;
+}
+
+.tag{
+font-size:12px;
+padding:4px 10px;
+border-radius:999px;
+border:1px solid rgba(148,163,184,.18);
+background:rgba(255,255,255,.04);
+}
+
+/* Viewer */
+
 .viewer{
-position:absolute;
-inset:0;
-background:black;
+flex:1;
 display:none;
+position:relative;
+height:100%;
 }
 
 .viewer.active{
@@ -109,20 +173,62 @@ display:block;
 }
 
 iframe{
+border:0;
 width:100%;
 height:100%;
-border:0;
+}
+
+.viewerBar{
+position:absolute;
+left:12px;
+right:12px;
+top:12px;
+display:flex;
+gap:10px;
+align-items:center;
+background:rgba(11,18,32,.75);
+border-radius:16px;
+padding:10px;
+}
+
+.viewerBar.hidden{
+display:none;
+}
+
+.viewerTitle{
+flex:1;
+display:flex;
+flex-direction:column;
+font-size:12px;
 }
 
 .fabBack{
 position:absolute;
-top:12px;
 left:12px;
-background:#0f172a;
-padding:10px;
-border-radius:12px;
+top:12px;
+width:44px;
+height:44px;
+border-radius:16px;
+background:rgba(11,18,32,.75);
+display:none;
+align-items:center;
+justify-content:center;
 cursor:pointer;
-z-index:20;
+}
+
+.fabBack.show{
+display:flex;
+}
+
+.toast{
+position:fixed;
+bottom:16px;
+left:50%;
+transform:translateX(-50%);
+background:#0f172a;
+padding:10px 12px;
+border-radius:12px;
+display:none;
 }
 
 </style>
@@ -133,72 +239,158 @@ z-index:20;
 <div class="app">
 
 <div class="topbar">
-<div class="title">Meine Karten</div>
+<div class="logo"></div>
+
+<div class="title">
+<b>Meine Karten</b>
+<span id="subTitle">Auswahl</span>
+</div>
+
 <div class="spacer"></div>
+
 <button class="btn" id="btnReload">↻</button>
 </div>
 
-<div class="home" id="home">
+<main class="home" id="home">
 
 <div class="row">
-<input class="search" id="search" placeholder="Karte suchen"/>
-<button class="btn" id="btnOpenLast">Letzte</button>
+<input class="search" id="search" placeholder="Karte suchen …">
+<button class="btn primary" id="btnOpenLast">▶ Letzte</button>
 </div>
 
-<div class="grid" id="grid"></div>
+<section class="grid" id="grid"></section>
 
-</div>
+</main>
 
-<div class="viewer" id="viewer">
+<section class="viewer" id="viewer">
 
 <div class="fabBack" id="fabBack">←</div>
 
+<div class="viewerBar hidden" id="viewerBar">
+<button class="btn" id="btnBack">←</button>
+
+<div class="viewerTitle">
+<b id="viewerName"></b>
+<span id="viewerUrl"></span>
+</div>
+
+<button class="btn" id="btnOpenNew">↗</button>
+</div>
+
 <iframe id="frame"></iframe>
 
-</div>
+</section>
+
+<div class="toast" id="toast"></div>
 
 </div>
 
 <script>
 
-const grid=document.getElementById("grid")
-const viewer=document.getElementById("viewer")
-const frame=document.getElementById("frame")
-const fabBack=document.getElementById("fabBack")
+const LS_LAST="mapsHub_last";
 
-let maps=[]
+const els={
+home:document.getElementById("home"),
+viewer:document.getElementById("viewer"),
+grid:document.getElementById("grid"),
+search:document.getElementById("search"),
+frame:document.getElementById("frame"),
+viewerName:document.getElementById("viewerName"),
+viewerUrl:document.getElementById("viewerUrl"),
+btnBack:document.getElementById("btnBack"),
+fabBack:document.getElementById("fabBack"),
+btnReload:document.getElementById("btnReload"),
+btnOpenLast:document.getElementById("btnOpenLast"),
+btnOpenNew:document.getElementById("btnOpenNew")
+};
 
-async function loadMaps(){
+let maps=[];
+let current=null;
 
-const res=await fetch("maps.json")
-maps=await res.json()
+function saveLS(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function loadLS(k){return JSON.parse(localStorage.getItem(k)||"null");}
 
-grid.innerHTML=maps.map(m=>`
-<div class="card" onclick="openMap('${m.id}')">
-<b>${m.name}</b>
+function render(){
+
+const q=els.search.value.toLowerCase();
+
+const list=maps.filter(m=>{
+if(!q)return true;
+return(m.name+m.desc+(m.tags||[]).join(" ")).toLowerCase().includes(q);
+});
+
+els.grid.innerHTML=list.map(m=>`
+<div class="card" data-id="${m.id}">
+<div class="name">${m.name}</div>
+<div class="desc">${m.desc||""}</div>
 </div>
-`).join("")
+`).join("");
+
+document.querySelectorAll(".card").forEach(c=>{
+c.onclick=()=>openMap(c.dataset.id);
+});
 
 }
 
 function openMap(id){
 
-const m=maps.find(x=>x.id===id)
+const m=maps.find(x=>x.id===id);
+if(!m)return;
 
-frame.src=m.url
+current=m;
 
-viewer.classList.add("active")
+els.frame.src=m.url;
+els.viewerName.textContent=m.name;
+els.viewerUrl.textContent=m.url;
+
+els.home.style.display="none";
+els.viewer.classList.add("active");
+
+saveLS(LS_LAST,{id:m.id});
+}
+
+function closeViewer(){
+
+els.frame.src="about:blank";
+
+els.viewer.classList.remove("active");
+els.home.style.display="flex";
 
 }
 
-fabBack.onclick=()=>{
-viewer.classList.remove("active")
-frame.src="about:blank"
+async function loadMaps(){
+
+const r=await fetch("maps.json",{cache:"no-store"});
+maps=await r.json();
+
+render();
+
 }
 
-document.getElementById("btnReload").onclick=()=>location.reload()
+els.btnBack.onclick=closeViewer;
+els.fabBack.onclick=closeViewer;
+els.btnReload.onclick=()=>location.reload();
 
-loadMaps()
+els.btnOpenLast.onclick=()=>{
+const last=loadLS(LS_LAST);
+if(last)openMap(last.id);
+};
+
+els.btnOpenNew.onclick=()=>{
+if(current)window.open(current.url,"_blank");
+};
+
+els.search.oninput=render;
+
+(async()=>{
+
+await loadMaps();
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("./sw.js").catch(()=>{});
+}
+
+})();
 
 </script>
 
