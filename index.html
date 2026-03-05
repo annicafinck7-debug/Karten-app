@@ -1,483 +1,206 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-  <title>Meine Karten</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<title>Meine Karten</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
-<link rel="icon" href="icons/icon-512.png" sizes="512x512">
+<link rel="manifest" href="manifest.json">
+
+<link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
-<link rel="apple-touch-startup-image" href="splash/iphone-1170x2532.png"
-      media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-<link rel="apple-touch-startup-image" href="splash/iphone-1290x2796.png"
-      media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-<link rel="apple-touch-startup-image" href="splash/iphone-1125x2436.png"
-      media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-  <meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- iOS PWA -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
 
-  <!-- ✅ ICONS (empfohlen: echte PNG-Dateien) -->
-  <!-- Favicon -->
-  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
-  <link rel="icon" href="icons/icon-512.png" sizes="512x512">
+html,body{
+height:100%;
+margin:0;
+background:#0b1220;
+color:#fff;
+font-family:system-ui;
+overflow-x:hidden;
+overscroll-behavior-x:none;
+touch-action:pan-y;
+-webkit-overflow-scrolling:touch;
+}
 
-  <!-- iPhone/iPad Home Screen Icon -->
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+.app{
+height:100%;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
 
-  <!-- Optional: Windows Tile -->
-  <meta name="msapplication-TileColor" content="#0b1220">
-  <meta name="msapplication-TileImage" content="icons/icon-144.png">
+.topbar{
+position:sticky;
+top:0;
+display:flex;
+align-items:center;
+padding:12px;
+background:#0b1220;
+border-bottom:1px solid rgba(255,255,255,0.1);
+z-index:10;
+}
 
-  <!-- ✅ iOS SPLASH (Launch Screen) – braucht echte Dateien -->
-  <!-- Du kannst später mehr Größen ergänzen – ich hab dir die wichtigsten Vorlagen rein -->
-  <link rel="apple-touch-startup-image" href="splash/iphone-1170x2532.png"
-        media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-  <link rel="apple-touch-startup-image" href="splash/iphone-1290x2796.png"
-        media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-  <link rel="apple-touch-startup-image" href="splash/iphone-1125x2436.png"
-        media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+.title{
+font-weight:700;
+}
 
-  <style>
-    :root{
-      --bg:#0b1220;
-      --card:#0f172a;
-      --card2:rgba(255,255,255,.06);
-      --text:#e5e7eb;
-      --muted:#a3adc2;
-      --border:rgba(148,163,184,.18);
-      --shadow:0 16px 50px rgba(0,0,0,.35);
-      --btn:#22c55e;
-      --btnText:#052e16;
-      --accent:#8b5cf6;
+.spacer{
+flex:1;
+}
 
-      --safeTop: env(safe-area-inset-top, 0px);
-      --safeBottom: env(safe-area-inset-bottom, 0px);
-    }
+.btn{
+background:#1e293b;
+border:none;
+padding:8px 12px;
+border-radius:10px;
+color:white;
+cursor:pointer;
+}
 
-    html,body{
-      height:100%;
-      margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      overscroll-behavior: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    *{box-sizing:border-box}
-    button,input{font:inherit}
+.home{
+flex:1;
+overflow:auto;
+padding:16px;
+}
 
-    .app{height:100%;display:flex;flex-direction:column;overflow:hidden;}
+.row{
+display:flex;
+gap:10px;
+}
 
-    .topbar{
-      position:sticky; top:0; z-index:50;
-      display:flex; align-items:center; gap:10px;
-      padding: calc(10px + var(--safeTop)) 14px 10px 14px;
-      background: rgba(11,18,32,.92);
-      backdrop-filter: blur(10px);
-      border-bottom:1px solid var(--border);
-    }
-    .logo{
-      width:34px;height:34px;border-radius:12px;
-      background:linear-gradient(135deg,var(--accent),rgba(255,255,255,.1));
-      box-shadow:var(--shadow);
-      flex:0 0 auto;
-    }
-    .title{display:flex;flex-direction:column;min-width:0}
-    .title b{font-size:14px}
-    .title span{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .spacer{flex:1}
+.search{
+flex:1;
+padding:10px;
+border-radius:10px;
+border:1px solid rgba(255,255,255,0.2);
+background:#0f172a;
+color:white;
+}
 
-    .btn{
-      height:36px; padding:0 12px; border-radius:12px;
-      border:1px solid var(--border);
-      background:var(--card2);
-      color:var(--text);
-      cursor:pointer;
-      font-weight:900;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      user-select:none;
-    }
-    .btn.primary{ background:var(--btn); border-color:transparent; color:var(--btnText); }
-    .btn:active{transform:translateY(1px)}
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+margin-top:16px;
+}
 
-    .screens{position:relative;flex:1;overflow:hidden;}
+.card{
+background:#0f172a;
+border-radius:16px;
+padding:16px;
+cursor:pointer;
+}
 
-    .home{
-      position:absolute; inset:0;
-      overflow:auto;
-      padding: 14px 14px calc(14px + var(--safeBottom)) 14px;
-      display:flex; flex-direction:column; gap:12px;
-      max-width:1100px; width:100%; margin:0 auto;
-      transform: translateX(0);
-      transition: transform .25s ease, opacity .25s ease;
-    }
-    .home.hidden{transform: translateX(-8%); opacity:0; pointer-events:none;}
+.viewer{
+position:absolute;
+inset:0;
+background:black;
+display:none;
+}
 
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-    .search{
-      flex:1; min-width:220px; height:42px;
-      border-radius:14px; border:1px solid var(--border);
-      background:var(--card); color:var(--text);
-      padding:0 12px; outline:none;
-    }
-    .search::placeholder{color:rgba(163,173,194,.7)}
-    .hint{color:var(--muted); font-size:12px}
+.viewer.active{
+display:block;
+}
 
-    .grid{display:grid;grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
-    @media (max-width:900px){.grid{grid-template-columns: repeat(2, minmax(0,1fr));}}
-    @media (max-width:580px){.grid{grid-template-columns: 1fr;}}
+iframe{
+width:100%;
+height:100%;
+border:0;
+}
 
-    .card{
-      border:1px solid var(--border);
-      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border-radius:18px;
-      padding:14px;
-      box-shadow:var(--shadow);
-      cursor:pointer;
-      transition:transform .10s ease;
-      user-select:none;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-height:128px;
-    }
-    .card:active{transform:translateY(1px)}
-    .card .name{font-weight:1000; font-size:15px}
-    .card .desc{color:var(--muted); font-size:12px; min-height:32px}
-    .card .tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:2px;}
-    .tag{
-      font-size:12px;
-      padding:4px 10px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.04);
-      color:var(--text);
-      font-weight:900;
-      white-space:nowrap;
-    }
+.fabBack{
+position:absolute;
+top:12px;
+left:12px;
+background:#0f172a;
+padding:10px;
+border-radius:12px;
+cursor:pointer;
+z-index:20;
+}
 
-    .viewer{
-      position:absolute; inset:0;
-      background:#000;
-      transform: translateX(105%);
-      transition: transform .25s ease;
-      will-change: transform;
-    }
-    .viewer.active{transform: translateX(0);}
-    iframe{border:0;width:100%;height:100%;background:#111;}
-
-    .viewerBar{
-      position:absolute; left:12px; right:12px;
-      top: calc(12px + var(--safeTop));
-      z-index:30;
-      display:flex; align-items:center; gap:10px;
-      background:rgba(11,18,32,.72);
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:10px 10px;
-      backdrop-filter: blur(10px);
-      transition:opacity .25s ease, transform .25s ease;
-    }
-    .viewerBar.hidden{opacity:0;transform:translateY(-10px);pointer-events:none;}
-    .viewerTitle{min-width:0;display:flex;flex-direction:column;gap:2px;flex:1;}
-    .viewerTitle b{font-size:13px}
-    .viewerTitle span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
-    .fabBack{
-      position:absolute;
-      left:12px;
-      top: calc(12px + var(--safeTop));
-      z-index:35;
-      width:44px;height:44px;
-      border-radius:16px;
-      border:1px solid var(--border);
-      background:rgba(11,18,32,.72);
-      backdrop-filter: blur(10px);
-      box-shadow:var(--shadow);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      font-weight:1000;
-      cursor:pointer;
-      user-select:none;
-    }
-    .fabBack.show{display:flex;}
-
-    .topTapZone{position:absolute;left:0;right:0;top:0;height:78px;z-index:25;background:transparent;}
-
-    .loader{
-      position:absolute;left:12px;right:12px;
-      top: calc(64px + var(--safeTop));
-      height:3px;border-radius:999px;
-      background:rgba(255,255,255,.10);
-      overflow:hidden;
-      z-index:40;
-      opacity:0;
-      transform: translateY(-6px);
-      transition: opacity .2s ease, transform .2s ease;
-      pointer-events:none;
-    }
-    .loader.show{opacity:1;transform: translateY(0);}
-    .loader > i{
-      display:block;height:100%;width:40%;
-      background: linear-gradient(90deg, rgba(139,92,246,.2), rgba(34,197,94,.9), rgba(139,92,246,.2));
-      animation: loadMove .9s infinite ease-in-out;
-      border-radius:999px;
-    }
-    @keyframes loadMove{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
-
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom: calc(16px + var(--safeBottom));
-      transform:translateX(-50%);
-      background:rgba(15,23,42,.92);
-      border:1px solid var(--border);
-      color:var(--text);
-      padding:10px 12px;
-      border-radius:14px;
-      box-shadow:var(--shadow);
-      display:none;
-      z-index:9999;
-      max-width:min(520px, 92vw);
-      font-size:13px;
-    }
-  </style>
+</style>
 </head>
 
 <body>
-  <div class="app">
-    <div class="topbar">
-      <div class="logo" aria-hidden="true"></div>
-      <div class="title">
-        <b>Meine Karten</b>
-        <span id="subTitle">Auswahl</span>
-      </div>
-      <div class="spacer"></div>
-      <button class="btn" id="btnReload" title="Aktualisieren">↻</button>
-    </div>
 
-    <div class="screens">
-      <main class="home" id="home">
-        <div class="row">
-          <input class="search" id="search" placeholder="Karte suchen (Name / Tags) …" />
-          <button class="btn primary" id="btnOpenLast" title="Letzte Karte öffnen">▶ Letzte</button>
-        </div>
-        <div class="hint">Favorit: Öffne eine Karte → zurück → „Letzte“ funktioniert immer.</div>
-        <section class="grid" id="grid"></section>
-      </main>
+<div class="app">
 
-      <section class="viewer" id="viewer" aria-hidden="true">
-        <div class="topTapZone" id="topTapZone" title="Tippen: Leiste anzeigen"></div>
+<div class="topbar">
+<div class="title">Meine Karten</div>
+<div class="spacer"></div>
+<button class="btn" id="btnReload">↻</button>
+</div>
 
-        <div class="fabBack" id="fabBack" title="Zurück">←</div>
+<div class="home" id="home">
 
-        <div class="viewerBar hidden" id="viewerBar">
-          <button class="btn" id="btnBack" title="Zurück">←</button>
-          <div class="viewerTitle">
-            <b id="viewerName">—</b>
-            <span id="viewerUrl">—</span>
-          </div>
-          <button class="btn" id="btnOpenNew" title="In neuem Tab öffnen">↗</button>
-        </div>
+<div class="row">
+<input class="search" id="search" placeholder="Karte suchen"/>
+<button class="btn" id="btnOpenLast">Letzte</button>
+</div>
 
-        <div class="loader" id="loader"><i></i></div>
+<div class="grid" id="grid"></div>
 
-        <iframe id="frame" title="Karten-Viewer" referrerpolicy="no-referrer"></iframe>
-      </section>
-    </div>
+</div>
 
-    <div class="toast" id="toast"></div>
-  </div>
+<div class="viewer" id="viewer">
+
+<div class="fabBack" id="fabBack">←</div>
+
+<iframe id="frame"></iframe>
+
+</div>
+
+</div>
 
 <script>
-  const LS_LAST = "mapsHub_last";
 
-  const els = {
-    subTitle: document.getElementById("subTitle"),
-    home: document.getElementById("home"),
-    viewer: document.getElementById("viewer"),
-    grid: document.getElementById("grid"),
-    search: document.getElementById("search"),
-    btnBack: document.getElementById("btnBack"),
-    btnOpenNew: document.getElementById("btnOpenNew"),
-    btnReload: document.getElementById("btnReload"),
-    btnOpenLast: document.getElementById("btnOpenLast"),
-    frame: document.getElementById("frame"),
-    viewerName: document.getElementById("viewerName"),
-    viewerUrl: document.getElementById("viewerUrl"),
-    toast: document.getElementById("toast"),
-    viewerBar: document.getElementById("viewerBar"),
-    fabBack: document.getElementById("fabBack"),
-    topTapZone: document.getElementById("topTapZone"),
-    loader: document.getElementById("loader"),
-  };
+const grid=document.getElementById("grid")
+const viewer=document.getElementById("viewer")
+const frame=document.getElementById("frame")
+const fabBack=document.getElementById("fabBack")
 
-  let maps = [];
-  let current = null;
+let maps=[]
 
-  function toast(msg){
-    els.toast.textContent = msg;
-    els.toast.style.display = "block";
-    clearTimeout(toast._t);
-    toast._t = setTimeout(()=>els.toast.style.display="none", 2400);
-  }
+async function loadMaps(){
 
-  function saveLS(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
-  function loadLS(k,fb){ try{ const s = localStorage.getItem(k); return s ? JSON.parse(s) : fb; }catch(e){ return fb; } }
+const res=await fetch("maps.json")
+maps=await res.json()
 
-  function esc(s){
-    return String(s??"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
-  }
+grid.innerHTML=maps.map(m=>`
+<div class="card" onclick="openMap('${m.id}')">
+<b>${m.name}</b>
+</div>
+`).join("")
 
-  function normalize(str){
-    return String(str||"").toLowerCase()
-      .replace(/\s+/g," ")
-      .replace(/[.,;:_/\\|()\-–—]/g,"")
-      .trim();
-  }
+}
 
-  function render(){
-    const q = normalize(els.search.value);
-    const list = maps.filter(m=>{
-      if(!q) return true;
-      const hay = normalize([m.name, m.desc, (m.tags||[]).join(" ")].join(" "));
-      return hay.includes(q);
-    });
+function openMap(id){
 
-    els.grid.innerHTML = list.map(m=>`
-      <article class="card" data-id="${esc(m.id)}" tabindex="0" role="button" aria-label="${esc(m.name)} öffnen">
-        <div class="name">${esc(m.name)}</div>
-        <div class="desc">${esc(m.desc || "")}</div>
-        <div class="tags">
-          ${(m.tags||[]).slice(0,6).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}
-        </div>
-      </article>
-    `).join("");
+const m=maps.find(x=>x.id===id)
 
-    els.grid.querySelectorAll(".card").forEach(card=>{
-      const open = ()=>openMap(card.dataset.id);
-      card.addEventListener("click", open);
-      card.addEventListener("keydown", (e)=>{
-        if(e.key==="Enter" || e.key===" "){
-          e.preventDefault();
-          open();
-        }
-      });
-    });
-  }
+frame.src=m.url
 
-  function setMode(mode){
-    const viewing = mode === "viewer";
-    els.home.classList.toggle("hidden", viewing);
-    els.viewer.classList.toggle("active", viewing);
-    els.viewer.setAttribute("aria-hidden", viewing ? "false" : "true");
-    els.subTitle.textContent = viewing ? "Karte geöffnet" : "Auswahl";
-  }
+viewer.classList.add("active")
 
-  let hideTimer = null;
-  function showControls(){
-    els.viewerBar.classList.remove("hidden");
-    els.fabBack.classList.remove("show");
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(hideControls, 1800);
-  }
-  function hideControls(){
-    els.viewerBar.classList.add("hidden");
-    els.fabBack.classList.add("show");
-  }
+}
 
-  function showLoader(on){
-    els.loader.classList.toggle("show", !!on);
-  }
+fabBack.onclick=()=>{
+viewer.classList.remove("active")
+frame.src="about:blank"
+}
 
-  function openMap(id){
-    const m = maps.find(x=>x.id===id);
-    if(!m){ toast("Karte nicht gefunden"); return; }
+document.getElementById("btnReload").onclick=()=>location.reload()
 
-    current = m;
-    saveLS(LS_LAST, {id:m.id, ts: Date.now()});
+loadMaps()
 
-    els.viewerName.textContent = m.name;
-    els.viewerUrl.textContent = m.url;
-
-    showLoader(true);
-    els.frame.src = m.url;
-
-    setMode("viewer");
-    history.pushState({view:"viewer", id:m.id}, "", "#"+encodeURIComponent(m.id));
-    showControls();
-  }
-
-  function closeViewer(){
-    current = null;
-    showLoader(false);
-    els.frame.src = "about:blank";
-    setMode("home");
-    history.pushState({view:"home"}, "", "#");
-  }
-
-  async function loadMaps(){
-    const res = await fetch("maps.json", {cache:"no-store"});
-    maps = await res.json();
-    render();
-  }
-
-  els.btnBack.addEventListener("click", closeViewer);
-  els.fabBack.addEventListener("click", closeViewer);
-  els.btnReload.addEventListener("click", ()=>location.reload());
-  els.btnOpenNew.addEventListener("click", ()=>{
-    if(current?.url) window.open(current.url, "_blank", "noopener,noreferrer");
-  });
-
-  els.topTapZone.addEventListener("click", showControls);
-  els.viewer.addEventListener("pointerdown", (e)=>{
-    const y = e.clientY || 0;
-    if(y < 110) showControls();
-  });
-
-  els.frame.addEventListener("load", ()=>showLoader(false));
-
-  els.btnOpenLast.addEventListener("click", ()=>{
-    const last = loadLS(LS_LAST, null);
-    if(last?.id){ openMap(last.id); }
-    else toast("Noch keine Karte geöffnet.");
-  });
-
-  els.search.addEventListener("input", render);
-
-  window.addEventListener("popstate", ()=>{
-    if(location.hash && location.hash.length > 1){
-      const id = decodeURIComponent(location.hash.slice(1));
-      openMap(id);
-    }else{
-      setMode("home");
-    }
-  });
-
-  (async ()=>{
-    await loadMaps();
-
-    if(location.hash && location.hash.length > 1){
-      const id = decodeURIComponent(location.hash.slice(1));
-      openMap(id);
-    } else {
-      setMode("home");
-    }
-
-    if("serviceWorker" in navigator){
-      navigator.serviceWorker.register("./sw.js").catch(()=>{});
-    }
-  })();
 </script>
+
 </body>
 </html>
