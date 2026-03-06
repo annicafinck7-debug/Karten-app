@@ -11,226 +11,190 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <style>
-
 html,body{
-height:100%;
-margin:0;
-background:#0b1220;
-color:#e5e7eb;
-font:14px system-ui;
-overscroll-behavior:none;
-touch-action:manipulation;
+  height:100%;
+  margin:0;
+  background:#0b1220;
+  color:#e5e7eb;
+  font:14px system-ui;
+  overscroll-behavior:none;
+  touch-action:manipulation;
 }
 
 /* verhindert graue Safari Pull-Leiste */
 body{
-position:fixed;
-width:100%;
-overflow:hidden;
+  position:fixed;
+  width:100%;
+  overflow:hidden;
 }
 
 .app{
-height:100%;
-display:flex;
-flex-direction:column;
-overflow:auto;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  overflow:auto;
 }
 
 /* Topbar */
-
 .topbar{
-position:sticky;
-top:0;
-display:flex;
-align-items:center;
-gap:10px;
-padding:12px 14px;
-background:#0b1220;
-border-bottom:1px solid rgba(148,163,184,.18);
-z-index:50;
+  position:sticky;
+  top:0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
+  background:#0b1220;
+  border-bottom:1px solid rgba(148,163,184,.18);
+  z-index:50;
 }
 
 .logo{
-width:34px;
-height:34px;
-border-radius:12px;
-background:linear-gradient(135deg,#8b5cf6,rgba(255,255,255,.1));
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#8b5cf6,rgba(255,255,255,.1));
 }
 
 .title{
-display:flex;
-flex-direction:column;
+  display:flex;
+  flex-direction:column;
 }
 
 .title span{
-font-size:12px;
-color:#a3adc2;
+  font-size:12px;
+  color:#a3adc2;
 }
 
 .spacer{
-flex:1;
+  flex:1;
 }
 
 .btn{
-height:36px;
-padding:0 12px;
-border-radius:12px;
-border:1px solid rgba(148,163,184,.18);
-background:rgba(255,255,255,.06);
-color:#fff;
-cursor:pointer;
-font-weight:900;
-display:flex;
-align-items:center;
+  height:36px;
+  padding:0 12px;
+  border-radius:12px;
+  border:1px solid rgba(148,163,184,.18);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  cursor:pointer;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .btn.primary{
-background:#22c55e;
-color:#052e16;
-border:none;
+  background:#22c55e;
+  color:#052e16;
+  border:none;
+}
+
+.iconBtn{
+  width:36px;
+  min-width:36px;
+  padding:0;
 }
 
 .home{
-padding:14px;
-display:flex;
-flex-direction:column;
-gap:12px;
-max-width:1100px;
-margin:auto;
-width:100%;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  max-width:1100px;
+  margin:auto;
+  width:100%;
+  box-sizing:border-box;
 }
 
 .row{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 .search{
-flex:1;
-min-width:220px;
-height:40px;
-border-radius:14px;
-border:1px solid rgba(148,163,184,.18);
-background:#0f172a;
-color:white;
-padding:0 12px;
+  flex:1;
+  min-width:220px;
+  height:40px;
+  border-radius:14px;
+  border:1px solid rgba(148,163,184,.18);
+  background:#0f172a;
+  color:white;
+  padding:0 12px;
+  box-sizing:border-box;
 }
 
 .grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:12px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
 }
 
 @media (max-width:900px){
-.grid{grid-template-columns:repeat(2,1fr);}
+  .grid{grid-template-columns:repeat(2,1fr);}
 }
 
 @media (max-width:580px){
-.grid{grid-template-columns:1fr;}
+  .grid{grid-template-columns:1fr;}
 }
 
 .card{
-border:1px solid rgba(148,163,184,.18);
-background:rgba(255,255,255,.05);
-border-radius:18px;
-padding:14px;
-cursor:pointer;
-display:flex;
-flex-direction:column;
-gap:6px;
+  border:1px solid rgba(148,163,184,.18);
+  background:rgba(255,255,255,.05);
+  border-radius:18px;
+  padding:14px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
 }
 
 .card .name{
-font-weight:900;
+  font-weight:900;
 }
 
 .card .desc{
-font-size:12px;
-color:#a3adc2;
+  font-size:12px;
+  color:#a3adc2;
 }
 
 .tag{
-font-size:12px;
-padding:4px 10px;
-border-radius:999px;
-border:1px solid rgba(148,163,184,.18);
-background:rgba(255,255,255,.04);
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,.18);
+  background:rgba(255,255,255,.04);
 }
 
 /* Viewer */
-
 .viewer{
-flex:1;
-display:none;
-position:relative;
-height:100%;
+  flex:1;
+  display:none;
+  position:relative;
+  height:100%;
 }
 
 .viewer.active{
-display:block;
+  display:block;
 }
 
 iframe{
-border:0;
-width:100%;
-height:100%;
-}
-
-.viewerBar{
-position:absolute;
-left:12px;
-right:12px;
-top:12px;
-display:flex;
-gap:10px;
-align-items:center;
-background:rgba(11,18,32,.75);
-border-radius:16px;
-padding:10px;
-}
-
-.viewerBar.hidden{
-display:none;
-}
-
-.viewerTitle{
-flex:1;
-display:flex;
-flex-direction:column;
-font-size:12px;
-}
-
-.fabBack{
-position:absolute;
-left:12px;
-top:12px;
-width:44px;
-height:44px;
-border-radius:16px;
-background:rgba(11,18,32,.75);
-display:none;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-}
-
-.fabBack.show{
-display:flex;
+  border:0;
+  width:100%;
+  height:100%;
+  background:#fff;
 }
 
 .toast{
-position:fixed;
-bottom:16px;
-left:50%;
-transform:translateX(-50%);
-background:#0f172a;
-padding:10px 12px;
-border-radius:12px;
-display:none;
+  position:fixed;
+  bottom:16px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#0f172a;
+  padding:10px 12px;
+  border-radius:12px;
+  display:none;
 }
-
 </style>
 </head>
 
@@ -238,160 +202,139 @@ display:none;
 
 <div class="app">
 
-<div class="topbar">
-<div class="logo"></div>
+  <div class="topbar">
+    <button class="btn iconBtn" id="btnHome" style="display:none;">←</button>
 
-<div class="title">
-<b>Meine Karten</b>
-<span id="subTitle">Auswahl</span>
-</div>
+    <div class="logo"></div>
 
-<div class="spacer"></div>
+    <div class="title">
+      <b>Meine Karten</b>
+      <span id="subTitle">Auswahl</span>
+    </div>
 
-<button class="btn" id="btnReload">↻</button>
-</div>
+    <div class="spacer"></div>
 
-<main class="home" id="home">
+    <button class="btn iconBtn" id="btnReload">↻</button>
+  </div>
 
-<div class="row">
-<input class="search" id="search" placeholder="Karte suchen …">
-<button class="btn primary" id="btnOpenLast">▶ Letzte</button>
-</div>
+  <main class="home" id="home">
+    <div class="row">
+      <input class="search" id="search" placeholder="Karte suchen …">
+      <button class="btn primary" id="btnOpenLast">▶ Letzte</button>
+    </div>
 
-<section class="grid" id="grid"></section>
+    <section class="grid" id="grid"></section>
+  </main>
 
-</main>
+  <section class="viewer" id="viewer">
+    <iframe id="frame"></iframe>
+  </section>
 
-<section class="viewer" id="viewer">
-
-<div class="fabBack" id="fabBack">←</div>
-
-<div class="viewerBar hidden" id="viewerBar">
-<button class="btn" id="btnBack">←</button>
-
-<div class="viewerTitle">
-<b id="viewerName"></b>
-<span id="viewerUrl"></span>
-</div>
-
-<button class="btn" id="btnOpenNew">↗</button>
-</div>
-
-<iframe id="frame"></iframe>
-
-</section>
-
-<div class="toast" id="toast"></div>
-
+  <div class="toast" id="toast"></div>
 </div>
 
 <script>
+const LS_LAST = "mapsHub_last";
 
-const LS_LAST="mapsHub_last";
-
-const els={
-home:document.getElementById("home"),
-viewer:document.getElementById("viewer"),
-grid:document.getElementById("grid"),
-search:document.getElementById("search"),
-frame:document.getElementById("frame"),
-viewerName:document.getElementById("viewerName"),
-viewerUrl:document.getElementById("viewerUrl"),
-btnBack:document.getElementById("btnBack"),
-fabBack:document.getElementById("fabBack"),
-btnReload:document.getElementById("btnReload"),
-btnOpenLast:document.getElementById("btnOpenLast"),
-btnOpenNew:document.getElementById("btnOpenNew")
+const els = {
+  home: document.getElementById("home"),
+  viewer: document.getElementById("viewer"),
+  grid: document.getElementById("grid"),
+  search: document.getElementById("search"),
+  frame: document.getElementById("frame"),
+  btnHome: document.getElementById("btnHome"),
+  btnReload: document.getElementById("btnReload"),
+  btnOpenLast: document.getElementById("btnOpenLast"),
+  subTitle: document.getElementById("subTitle")
 };
 
-let maps=[];
-let current=null;
+let maps = [];
+let current = null;
 
-function saveLS(k,v){localStorage.setItem(k,JSON.stringify(v));}
-function loadLS(k){return JSON.parse(localStorage.getItem(k)||"null");}
+function saveLS(k,v){
+  localStorage.setItem(k, JSON.stringify(v));
+}
+
+function loadLS(k){
+  return JSON.parse(localStorage.getItem(k) || "null");
+}
+
+function updateTopbar(){
+  const inViewer = els.viewer.classList.contains("active");
+  els.btnHome.style.display = inViewer ? "flex" : "none";
+  els.subTitle.textContent = inViewer && current ? current.name : "Auswahl";
+}
 
 function render(){
+  const q = els.search.value.toLowerCase().trim();
 
-const q=els.search.value.toLowerCase();
+  const list = maps.filter(m => {
+    if(!q) return true;
+    return (String(m.name || "") + " " + String(m.desc || "") + " " + String((m.tags || []).join(" ")))
+      .toLowerCase()
+      .includes(q);
+  });
 
-const list=maps.filter(m=>{
-if(!q)return true;
-return(m.name+m.desc+(m.tags||[]).join(" ")).toLowerCase().includes(q);
-});
+  els.grid.innerHTML = list.map(m => `
+    <div class="card" data-id="${m.id}">
+      <div class="name">${m.name || ""}</div>
+      <div class="desc">${m.desc || ""}</div>
+    </div>
+  `).join("");
 
-els.grid.innerHTML=list.map(m=>`
-<div class="card" data-id="${m.id}">
-<div class="name">${m.name}</div>
-<div class="desc">${m.desc||""}</div>
-</div>
-`).join("");
-
-document.querySelectorAll(".card").forEach(c=>{
-c.onclick=()=>openMap(c.dataset.id);
-});
-
+  document.querySelectorAll(".card").forEach(card => {
+    card.onclick = () => openMap(card.dataset.id);
+  });
 }
 
 function openMap(id){
+  const m = maps.find(x => String(x.id) === String(id));
+  if(!m) return;
 
-const m=maps.find(x=>x.id===id);
-if(!m)return;
+  current = m;
+  els.frame.src = m.url;
+  els.home.style.display = "none";
+  els.viewer.classList.add("active");
 
-current=m;
-
-els.frame.src=m.url;
-els.viewerName.textContent=m.name;
-els.viewerUrl.textContent=m.url;
-
-els.home.style.display="none";
-els.viewer.classList.add("active");
-
-saveLS(LS_LAST,{id:m.id});
+  saveLS(LS_LAST, { id: m.id });
+  updateTopbar();
 }
 
 function closeViewer(){
-
-els.frame.src="about:blank";
-
-els.viewer.classList.remove("active");
-els.home.style.display="flex";
-
+  els.frame.src = "about:blank";
+  current = null;
+  els.viewer.classList.remove("active");
+  els.home.style.display = "flex";
+  updateTopbar();
 }
 
 async function loadMaps(){
-
-const r=await fetch("maps.json",{cache:"no-store"});
-maps=await r.json();
-
-render();
-
+  const r = await fetch("maps.json", { cache:"no-store" });
+  maps = await r.json();
+  render();
 }
 
-els.btnBack.onclick=closeViewer;
-els.fabBack.onclick=closeViewer;
-els.btnReload.onclick=()=>location.reload();
+els.btnHome.onclick = closeViewer;
+els.btnReload.onclick = () => location.reload();
 
-els.btnOpenLast.onclick=()=>{
-const last=loadLS(LS_LAST);
-if(last)openMap(last.id);
+els.btnOpenLast.onclick = () => {
+  const last = loadLS(LS_LAST);
+  if(last && last.id != null){
+    openMap(last.id);
+  }
 };
 
-els.btnOpenNew.onclick=()=>{
-if(current)window.open(current.url,"_blank");
-};
+els.search.oninput = render;
 
-els.search.oninput=render;
+(async () => {
+  await loadMaps();
 
-(async()=>{
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  }
 
-await loadMaps();
-
-if("serviceWorker" in navigator){
-navigator.serviceWorker.register("./sw.js").catch(()=>{});
-}
-
+  updateTopbar();
 })();
-
 </script>
 
 </body>
